@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>丙午马年✨你的财运藏在哪里？</title>
+    <!-- 引入ECharts用于绘制网状图 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background-color: #f8f5f0;
+            color: #333;
+            min-height: 100vh;
+            padding-bottom: 20px;
+        }
+
+        /* 通用容器样式 */
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        /* 验证码验证页样式 */
+        .verify-page {
+            text-align: center;
+            padding-top: 60px;
+            display: block;
+        }
+
+        .verify-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d4a017;
+            margin-bottom: 30px;
+        }
+
+        .verify-input {
+            width: 80%;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            outline: none;
+        }
+
+        .verify-input:focus {
+            border-color: #d4a017;
+        }
+
+        .verify-btn {
+            background-color: #d4a017;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .verify-btn:hover {
+            background-color: #b8860b;
+        }
+
+        .verify-error {
+            color: #ff4444;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* 介绍页样式 */
+        .intro-page {
+            text-align: center;
+            padding-top: 20px;
+            display: none;
+        }
+
+        .intro-img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            max-height: 250px;
+            object-fit: cover;
+        }
+
+        .intro-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #d4a017;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .intro-desc {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .start-btn {
+            background-color: #d4a017;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .start-btn:hover {
+            background-color: #b8860b;
+        }
+
+        /* 答题页样式 */
+        .quiz-page {
+            display: none;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .back-btn {
+            font-size: 14px;
+            color: #d4a017;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 5px 10px;
+        }
+
+        .quiz-progress {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .quiz-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .option-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .option-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #faf6f0;
+        }
+
+        .option-item.selected {
+            border-color: #d4a017;
+            background-color: #fff8e8;
+        }
+
+        .option-text {
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .next-btn {
+            width: 100%;
+            background-color: #d4a017;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .next-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 结果页样式 */
+        .result-page {
+            display: none;
+            padding-top: 20px;
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d4a017;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* 网状图容器 - 增加内边距，避免文字溢出 */
+        .radar-chart {
+            width: 100%;
+            height: 320px; /* 略微增高，给文字留出空间 */
+            margin: 0 auto 20px;
+            padding: 10px; /* 内边距，隔离文字和图表 */
+        }
+
+        .result-desc {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #555;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .restart-btn {
+            width: 100%;
+            background-color: #d4a017;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* 加载提示 */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 15px;
+            color: #999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 验证码验证页 -->
+    <div class="verify-page container">
+        <h2 class="verify-title">订单验证</h2>
+        <input type="text" class="verify-input" id="verifyCode" placeholder="请输入订单验证码">
+        <button class="verify-btn" id="verifyBtn">验证进入</button>
+        <p class="verify-error" id="verifyError">验证码错误，请输入正确的验证码！</p>
+    </div>
+
+    <!-- 介绍页 -->
+    <div class="intro-page container">
+        <!-- 赛博朋克风格投资图片 -->
+        <img src="https://picsum.photos/id/180/800/500" alt="赛博朋克风格投资图片" class="intro-img">
+        <h1 class="intro-title">丙午马年✨你的财运藏在哪里？</h1>
+        <p class="intro-desc">
+            丙午马年，火旺主势，财运多藏在“行动”与“选择”里。请凭第一直觉完成20道测试题，解锁你的专属财运方向，找到属于你的财富密码！
+        </p>
+        <button class="start-btn" id="startBtn">开始测试</button>
+    </div>
+
+    <!-- 答题页 -->
+    <div class="quiz-page container">
+        <div class="quiz-header">
+            <button class="back-btn" id="backBtn">← 上一题</button>
+            <span class="quiz-progress" id="progressText">第1题/共20题</span>
+        </div>
+        <h2 class="quiz-title" id="quizTitle">加载中...</h2>
+        <ul class="option-list" id="optionList">
+            <div class="loading">正在加载题目...</div>
+        </ul>
+        <button class="next-btn" id="nextBtn" disabled>下一题</button>
+    </div>
+
+    <!-- 结果页 -->
+    <div class="result-page container">
+        <h2 class="result-title">你的财运分析结果</h2>
+        <!-- 网状图容器 -->
+        <div class="radar-chart" id="radarChart"></div>
+        <!-- 结果描述 -->
+        <div class="result-desc" id="resultDesc"></div>
+        <!-- 重新测试按钮 -->
+        <button class="restart-btn" id="restartBtn">重新测试</button>
+    </div>
+
+    <script>
+        // 1. 常量定义
+        const CORRECT_CODE = "112233"; // 正确的订单验证码
+        // 测试题库数据
+        const quizData = [
+            {
+                question: "清晨醒来，你更期待今天能收到哪种消息？",
+                options: [
+                    { text: "面试/考证的成功通知", type: "A" },
+                    { text: "合作方的签约邀约", type: "B" },
+                    { text: "意外的奖金/红包", type: "C" },
+                    { text: "许久未联系的贵人问候", type: "D" }
+                ]
+            },
+            {
+                question: "路过彩票站，你会？",
+                options: [
+                    { text: "从不买，觉得不如踏实努力", type: "A" },
+                    { text: "偶尔买，当作生活小乐趣", type: "B" },
+                    { text: "固定号码，长期坚持", type: "C" },
+                    { text: "只在节日/特殊日子买", type: "D" }
+                ]
+            },
+            {
+                question: "面对一份“高薪但压力大”和“稳薪但轻松”的工作，你选？",
+                options: [
+                    { text: "高薪，挑战自我", type: "A" },
+                    { text: "稳薪，先积累再跳槽", type: "B" },
+                    { text: "纠结，先观望机会", type: "C" },
+                    { text: "结合兴趣，哪个契合选哪个", type: "D" }
+                ]
+            },
+            {
+                question: "朋友邀请你合伙做小生意，你的第一反应是？",
+                options: [
+                    { text: "先查市场数据，做风险评估", type: "A" },
+                    { text: "爽快答应，相信朋友", type: "B" },
+                    { text: "拒绝，不想承担风险", type: "C" },
+                    { text: "部分参与，投入少量资金", type: "D" }
+                ]
+            },
+            {
+                question: "你对“新技能变现”的态度是？",
+                options: [
+                    { text: "正在学习，计划尽快落地", type: "A" },
+                    { text: "想学习，但一直没行动", type: "B" },
+                    { text: "觉得不适合自己，专注本职", type: "C" },
+                    { text: "观望中，等别人做出成果再学", type: "D" }
+                ]
+            },
+            {
+                question: "整理房间时，你发现一张过期的优惠券，你的心情是？",
+                options: [
+                    { text: "无所谓，下次注意", type: "A" },
+                    { text: "有点可惜，提醒自己做好规划", type: "B" },
+                    { text: "很懊恼，责怪自己粗心", type: "C" },
+                    { text: "随手扔掉，不放在心上", type: "D" }
+                ]
+            },
+            {
+                question: "同事/朋友向你借钱，你会？",
+                options: [
+                    { text: "按能力出借，写清借条", type: "A" },
+                    { text: "不好意思拒绝，全额借出", type: "B" },
+                    { text: "找理由拒绝，怕有去无回", type: "C" },
+                    { text: "借出一部分，不抱回收期待", type: "D" }
+                ]
+            },
+            {
+                question: "你更愿意把闲置资金投入哪种方式？",
+                options: [
+                    { text: "学习课程/考证，提升赚钱能力", type: "A" },
+                    { text: "稳健理财（存款/国债）", type: "B" },
+                    { text: "高风险理财（股票/基金）", type: "C" },
+                    { text: "创业/副业启动资金", type: "D" }
+                ]
+            },
+            {
+                question: "面对陌生的赚钱领域，你会？",
+                options: [
+                    { text: "主动查资料，拆解逻辑", type: "A" },
+                    { text: "请教行业内的人", type: "B" },
+                    { text: "觉得复杂，直接放弃", type: "C" },
+                    { text: "先小额尝试，边做边学", type: "D" }
+                ]
+            },
+            {
+                question: "你的消费习惯更接近？",
+                options: [
+                    { text: "理性规划，每月存固定金额", type: "A" },
+                    { text: "按需消费，偶尔超支", type: "B" },
+                    { text: "冲动消费，喜欢就买", type: "C" },
+                    { text: "极简消费，大部分钱用于投资", type: "D" }
+                ]
+            },
+            {
+                question: "工作/学习中，你更看重？",
+                options: [
+                    { text: "成长空间，哪怕初期薪资低", type: "A" },
+                    { text: "当下薪资，能解燃眉之急", type: "B" },
+                    { text: "工作氛围，薪资无所谓", type: "C" },
+                    { text: "灵活度，方便兼顾副业", type: "D" }
+                ]
+            },
+            {
+                question: "你梦见自己在一个陌生的地方捡到钱，这个地方更像？",
+                options: [
+                    { text: "图书馆/教室", type: "A" },
+                    { text: "办公室/会议室", type: "B" },
+                    { text: "商场/游乐场", type: "C" },
+                    { text: "车站/机场", type: "D" }
+                ]
+            },
+            {
+                question: "别人对你的评价，最常出现的是？",
+                options: [
+                    { text: "踏实靠谱，做事有计划", type: "A" },
+                    { text: "热情大方，人脉广", type: "B" },
+                    { text: "佛系随缘，不争不抢", type: "C" },
+                    { text: "思维活跃，脑洞大", type: "D" }
+                ]
+            },
+            {
+                question: "遇到赚钱机会，但需要占用休息时间，你会？",
+                options: [
+                    { text: "毫不犹豫，全力投入", type: "A" },
+                    { text: "权衡利弊，合理分配时间", type: "B" },
+                    { text: "直接拒绝，优先休息", type: "C" },
+                    { text: "偶尔参与，不长期坚持", type: "D" }
+                ]
+            },
+            {
+                question: "你对“财运”的理解是？",
+                options: [
+                    { text: "一分耕耘一分收获，靠实力积累", type: "A" },
+                    { text: "人脉为王，靠资源变现", type: "B" },
+                    { text: "运气主导，顺其自然", type: "C" },
+                    { text: "趋势使然，靠眼光抓住风口", type: "D" }
+                ]
+            },
+            {
+                question: "学习新技能时，你会？",
+                options: [
+                    { text: "制定详细计划，严格执行", type: "A" },
+                    { text: "跟着教程学，偶尔偷懒", type: "B" },
+                    { text: "学了一半就放弃，换个新的", type: "C" },
+                    { text: "边学边用，快速落地实践", type: "D" }
+                ]
+            },
+            {
+                question: "你更擅长哪种社交方式？",
+                options: [
+                    { text: "深度交流，建立长期信任", type: "A" },
+                    { text: "广泛社交，认识不同的人", type: "B" },
+                    { text: "被动社交，别人找我才回应", type: "C" },
+                    { text: "线上社交，通过网络链接资源", type: "D" }
+                ]
+            },
+            {
+                question: "看到别人靠副业赚大钱，你会？",
+                options: [
+                    { text: "分析对方的方法，借鉴优化", type: "A" },
+                    { text: "羡慕，却没有行动", type: "B" },
+                    { text: "觉得是运气，和自己无关", type: "C" },
+                    { text: "立刻跟风，盲目尝试", type: "D" }
+                ]
+            },
+            {
+                question: "你的手机里，关于“理财/赚钱”的APP有多少？",
+                options: [
+                    { text: "3个以上，且经常使用", type: "A" },
+                    { text: "1-2个，偶尔查看", type: "B" },
+                    { text: "0个，从不关注", type: "C" },
+                    { text: "很多，但很少打开", type: "D" }
+                ]
+            },
+            {
+                question: "丙午马年，你最想实现的财富目标是？",
+                options: [
+                    { text: "掌握一项能变现的核心技能", type: "A" },
+                    { text: "拓展人脉，找到合作机会", type: "B" },
+                    { text: "守住现有财富，不出现亏损", type: "C" },
+                    { text: "抓住风口，实现快速盈利", type: "D" }
+                ]
+            }
+        ];
+
+        // 2. 全局变量
+        let currentQuestionIndex = 0; // 当前题目索引
+        let answers = { A: 0, B: 0, C: 0, D: 0 }; // 存储各选项得分
+        let selectedOption = null; // 当前选中的选项
+        let answerHistory = []; // 记录每道题的答案，用于返回上一题时恢复
+
+        // 3. DOM元素获取
+        const verifyPage = document.querySelector('.verify-page');
+        const introPage = document.querySelector('.intro-page');
+        const quizPage = document.querySelector('.quiz-page');
+        const resultPage = document.querySelector('.result-page');
+        const verifyCodeInput = document.getElementById('verifyCode');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const verifyError = document.getElementById('verifyError');
+        const startBtn = document.getElementById('startBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const backBtn = document.getElementById('backBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const quizTitle = document.getElementById('quizTitle');
+        const optionList = document.getElementById('optionList');
+        const progressText = document.getElementById('progressText');
+        const radarChart = document.getElementById('radarChart');
+        const resultDesc = document.getElementById('resultDesc');
+
+        // 4. 初始化函数
+        function init() {
+            // 初始化答案历史
+            answerHistory = new Array(quizData.length).fill(null);
+            
+            // 绑定事件
+            verifyBtn.addEventListener('click', verifyCode);
+            startBtn.addEventListener('click', startQuiz);
+            nextBtn.addEventListener('click', goToNextQuestion);
+            backBtn.addEventListener('click', goToPrevQuestion);
+            restartBtn.addEventListener('click', restartQuiz);
+            
+            // 监听回车键验证
+            verifyCodeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') verifyCode();
+            });
+        }
+
+        // 5. 验证码验证
+        function verifyCode() {
+            const inputCode = verifyCodeInput.value.trim();
+            if (inputCode === CORRECT_CODE) {
+                verifyError.style.display = 'none';
+                verifyPage.style.display = 'none';
+                introPage.style.display = 'block';
+            } else {
+                verifyError.style.display = 'block';
+                verifyCodeInput.focus();
+            }
+        }
+
+        // 6. 开始测试
+        function startQuiz() {
+            introPage.style.display = 'none';
+            quizPage.style.display = 'block';
+            renderQuestion(currentQuestionIndex);
+            // 初始化返回按钮状态
+            updateBackBtnStatus();
+        }
+
+        // 7. 渲染题目
+        function renderQuestion(index) {
+            // 重置选中状态
+            selectedOption = answerHistory[index] || null;
+            nextBtn.disabled = !selectedOption;
+
+            // 更新进度文本
+            progressText.textContent = `第${index + 1}题/共20题`;
+
+            // 获取当前题目数据
+            const currentQuiz = quizData[index];
+            quizTitle.textContent = currentQuiz.question;
+
+            // 渲染选项
+            optionList.innerHTML = '';
+            currentQuiz.options.forEach((option, optIndex) => {
+                const li = document.createElement('li');
+                li.className = 'option-item';
+                // 如果是历史选中的选项，添加选中样式
+                if (selectedOption === option.type) {
+                    li.classList.add('selected');
+                }
+                li.dataset.type = option.type;
+                li.innerHTML = `<span class="option-text">${String.fromCharCode(65 + optIndex)}. ${option.text}</span>`;
+                
+                // 选项点击事件
+                li.addEventListener('click', () => {
+                    // 移除其他选项的选中状态
+                    document.querySelectorAll('.option-item').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    // 添加当前选项选中状态
+                    li.classList.add('selected');
+                    selectedOption = option.type;
+                    nextBtn.disabled = false;
+                });
+
+                optionList.appendChild(li);
+            });
+        }
+
+        // 8. 更新返回按钮状态
+        function updateBackBtnStatus() {
+            if (currentQuestionIndex === 0) {
+                backBtn.style.opacity = '0.5';
+                backBtn.disabled = true;
+            } else {
+                backBtn.style.opacity = '1';
+                backBtn.disabled = false;
+            }
+        }
+
+        // 9. 跳转到下一题
+        function goToNextQuestion() {
+            // 记录当前选中选项的答案
+            answerHistory[currentQuestionIndex] = selectedOption;
+            
+            // 记录得分（仅在前进时更新，避免重复计算）
+            if (currentQuestionIndex < answerHistory.length - 1) {
+                // 先减去上一次的答案得分（如果有）
+                if (answerHistory[currentQuestionIndex]) {
+                    answers[answerHistory[currentQuestionIndex]]--;
+                }
+                answers[selectedOption]++;
+            }
+
+            // 判断是否是最后一题
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion(currentQuestionIndex);
+                updateBackBtnStatus();
+            } else {
+                // 最后一题，更新最终得分
+                answers = { A: 0, B: 0, C: 0, D: 0 };
+                answerHistory.forEach(ans => {
+                    if (ans) answers[ans]++;
+                });
+                // 显示结果页
+                showResult();
+            }
+        }
+
+        // 10. 跳转到上一题
+        function goToPrevQuestion() {
+            if (currentQuestionIndex > 0) {
+                // 记录当前题目的答案
+                answerHistory[currentQuestionIndex] = selectedOption;
+                currentQuestionIndex--;
+                renderQuestion(currentQuestionIndex);
+                updateBackBtnStatus();
+            }
+        }
+
+        // 11. 生成测试结果
+        function showResult() {
+            quizPage.style.display = 'none';
+            resultPage.style.display = 'block';
+
+            // 1. 绘制网状图（雷达图）
+            drawRadarChart();
+
+            // 2. 生成结果描述
+            generateResultDesc();
+        }
+
+        // 12. 绘制雷达图 - 核心优化布局，解决文字重合问题
+        function drawRadarChart() {
+            const chartDom = radarChart;
+            const myChart = echarts.init(chartDom);
+            
+            // 雷达图配置 - 关键调整：标题位置、图例位置、雷达图半径、内边距
+            const option = {
+                // 图表整体内边距，给文字留出空间
+                grid: {
+                    top: 30,
+                    right: 20,
+                    bottom: 10,
+                    left: 20
+                },
+                // 标题配置：上移+缩小字体，避免与图表重合
+                title: {
+                    text: '你的财运维度得分',
+                    left: 'center',
+                    top: 0, // 标题置顶
+                    textStyle: {
+                        fontSize: 13, // 缩小字体
+                        color: '#666',
+                        fontWeight: 'normal'
+                    }
+                },
+                // 提示框配置：避免遮挡
+                tooltip: {
+                    trigger: 'item',
+                    textStyle: {
+                        fontSize: 12
+                    }
+                },
+                // 图例配置：移到底部，横向排列，避免与雷达图重合
+                legend: {
+                    orient: 'horizontal', // 横向排列
+                    bottom: 0, // 图例置底
+                    left: 'center', // 居中
+                    textStyle: {
+                        fontSize: 12,
+                        color: '#666'
+                    },
+                    itemWidth: 10, // 缩小图例图标
+                    itemHeight: 10
+                },
+                // 雷达图核心配置：缩小半径，内移，避免文字溢出
+                radar: {
+                    indicator: [
+                        { name: '智财型(A)', max: 20 },
+                        { name: '人脉型(B)', max: 20 },
+                        { name: '稳财型(C)', max: 20 },
+                        { name: '风口型(D)', max: 20 }
+                    ],
+                    radius: '60%', // 缩小雷达图半径（原70%），给文字留空间
+                    center: ['50%', '45%'], // 雷达图整体上移
+                    axisName: {
+                        fontSize: 12,
+                        color: '#666',
+                        // 维度名称与雷达图的距离
+                        distance: 15
+                    },
+                    // 雷达图轴线样式优化
+                    splitLine: {
+                        lineStyle: {
+                            color: '#eee'
+                        }
+                    },
+                    splitArea: {
+                        areaStyle: {
+                            color: ['#faf6f0', '#fff']
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '你的财运得分',
+                        type: 'radar',
+                        data: [
+                            {
+                                value: [answers.A, answers.B, answers.C, answers.D],
+                                name: '你的财运得分',
+                                areaStyle: {
+                                    color: 'rgba(212, 160, 23, 0.2)'
+                                },
+                                lineStyle: {
+                                    color: '#d4a017',
+                                    width: 2
+                                },
+                                itemStyle: {
+                                    color: '#d4a017',
+                                    size: 4
+                                }
+                            }
+                        ],
+                        // 系列标签配置：避免与图形重合
+                        label: {
+                            show: false // 隐藏数据标签（如需显示可调整位置）
+                        }
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+            // 适配屏幕大小变化
+            window.addEventListener('resize', () => {
+                myChart.resize();
+            });
+        }
+
+        // 13. 生成结果描述
+        function generateResultDesc() {
+            // 计算各类型得分
+            const scores = {
+                A: answers.A,
+                B: answers.B,
+                C: answers.C,
+                D: answers.D
+            };
+
+            // 找到最高得分的类型
+            let maxType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            let maxScore = scores[maxType];
+
+            // 结果描述文本
+            let descText = '';
+
+            // 判断是否为综合型（差值≤3）
+            const scoreValues = Object.values(scores);
+            const maxVal = Math.max(...scoreValues);
+            const minVal = Math.min(...scoreValues);
+            const isComprehensive = (maxVal - minVal) <= 3;
+
+            if (isComprehensive) {
+                descText = `### 🌈 综合型：财运藏在“平衡与取舍”里
+你的财运没有固定方向，马年的财富增长，关键在于**平衡好成长、人脉、守成与风口**。你兼具多种优势，只要合理分配精力，就能实现全方位的财富收获。
+
+✅ 财运落地：
+1. 主抓1项核心技能学习（智财），同时维护关键人脉（人脉）；
+2. 保留部分资金稳健储蓄（稳财），用少量资金尝试风口项目（风口）；
+3. 根据自身状态灵活调整，不被计划捆绑。
+
+❌ 避坑提醒：
+避免贪多嚼不烂，学会取舍，将精力聚焦在最有潜力的方向上。`;
+            } else {
+                switch (maxType) {
+                    case 'A':
+                        descText = `### 🌟 智财型：财运藏在“成长与技能”里（得分：${maxScore}）
+丙午火旺，主“精进”，你的财运核心是**用能力换价值**。马年里，你正在学习的新技能或深耕的领域，会成为你的“财富密码”。
+
+✅ 财运落地：
+1. 完成既定的学习计划，拿到证书/掌握核心技能；
+2. 将技能转化为副业（如翻译、技术咨询）；
+3. 职场中凭借专业能力争取加薪/晋升。
+
+❌ 避坑提醒：
+不要急于求成，技能变现需要时间沉淀，避免半途而废。`;
+                        break;
+                    case 'B':
+                        descText = `### 🤝 人脉型：财运藏在“链接与合作”里（得分：${maxScore}）
+马年主“动”，人脉流动带来财气，你的财运核心是**用资源换机会**。你积累的社交圈、朋友的邀约，都可能成为赚钱的突破口。
+
+✅ 财运落地：
+1. 积极参与行业交流、朋友聚会，主动分享自己的优势；
+2. 把握合伙机会，与靠谱的人合作小项目；
+3. 维护老关系，贵人可能会给你带来意外的订单/工作机会。
+
+❌ 避坑提醒：
+合伙需明确权责，避免因人情模糊边界，导致财务纠纷。`;
+                        break;
+                    case 'C':
+                        descText = `### 🛡️ 稳财型：财运藏在“守成与规划”里（得分：${maxScore}）
+丙午年火旺易躁，而你独守本心，你的财运核心是**用稳健抗风险**。马年里，“不亏”就是赚，守住现有财富，合理规划支出，会让你收获稳稳的幸福。
+
+✅ 财运落地：
+1. 坚持稳健理财，避免高风险投资；
+2. 做好消费规划，每月强制储蓄；
+3. 专注本职工作，不盲目跟风副业，守住收入基本盘。
+
+❌ 避坑提醒：
+不要过于保守，适当尝试小额、低风险的新机会，避免错失增长可能。`;
+                        break;
+                    case 'D':
+                        descText = `### 🚀 风口型：财运藏在“趋势与行动”里（得分：${maxScore}）
+马年主“变”，风口迭起，你的财运核心是**用眼光抓机遇**。你活跃的思维和快速行动的能力，能让你在新赛道中抢占先机。
+
+✅ 财运落地：
+1. 关注新兴领域（如AI账号、云原生相关副业）；
+2. 快速试错，将想法转化为实际行动，比如上线第一个账号内容；
+3. 借助平台流量，实现内容变现或产品带货。
+
+❌ 避坑提醒：
+避免盲目跟风，风口虽好，需结合自身优势，不要贪多求快。`;
+                        break;
+                }
+            }
+
+            // 替换markdown格式为html
+            descText = descText.replace(/### /g, '<h3 style="margin: 10px 0;">');
+            descText = descText.replace(/\n/g, '<br>');
+            descText = descText.replace(/✅ /g, '<br><strong style="color: #d4a017;">✅ </strong>');
+            descText = descText.replace(/❌ /g, '<br><strong style="color: #d4a017;">❌ </strong>');
+            descText = descText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            resultDesc.innerHTML = descText;
+        }
+
+        // 14. 重新测试
+        function restartQuiz() {
+            // 重置全局变量
+            currentQuestionIndex = 0;
+            answers = { A: 0, B: 0, C: 0, D: 0 };
+            selectedOption = null;
+            answerHistory = new Array(quizData.length).fill(null);
+            
+            // 清空验证码输入
+            verifyCodeInput.value = '';
+            verifyError.style.display = 'none';
+
+            // 回到验证码页面
+            resultPage.style.display = 'none';
+            verifyPage.style.display = 'block';
+            verifyCodeInput.focus();
+        }
+
+        // 初始化
+        window.onload = init;
+    </script>
+</body>
+</html>
